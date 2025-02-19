@@ -7,6 +7,15 @@ API_VERSION = "5.131"
 BASE_URL = "https://api.vk.com/method"
 
 
+class LinkError(Exception):
+    """Исключение для ошибок с сокращённой ссылкой."""
+    pass
+
+class APIError(Exception):
+    """Исключение для ошибок API."""
+    pass
+
+
 def is_shorten_link(token: str, url: str):
     parsed_url = urlparse(url)
 
@@ -42,7 +51,7 @@ def shorten_link(token: str, url: str) -> str:
         return shorten_response_data["response"]["short_url"]
 
     error_msg = shorten_response_data.get("error", {}).get("error_msg", "Неизвестная ошибка")
-    raise Exception(f"Ошибка API VK: {error_msg}")
+    raise APIError(f"Ошибка API VK: {error_msg}")
 
 
 def count_clicks(token: str, short_url: str) -> int:
@@ -61,7 +70,7 @@ def count_clicks(token: str, short_url: str) -> int:
         return stats[0].get("count", 0) if stats else 0
 
     error_msg = link_stats_data.get("error", {}).get("error_msg", "Неизвестная ошибка")
-    raise Exception(f"Ошибка API VK: {error_msg}")
+    raise APIError(f"Ошибка API VK: {error_msg}")
 
 
 def main():
@@ -69,7 +78,7 @@ def main():
         load_dotenv()
         token = os.getenv("VK_TOKEN")
         if not token:
-            raise Exception("Не найден VK_TOKEN в .env")
+            raise LinkError("Не найден VK_TOKEN в .env")
 
         url = input("Введите ссылку: ").strip()
 
@@ -80,8 +89,11 @@ def main():
             shortened_url = shorten_link(token, url)
             print(f"Сокращенная ссылка: {shortened_url}")
 
-    except Exception as e:
-        print(f"Произошла ошибка: {e}")
+    except LinkError as e:
+        print(f"Ошибка при обработке токена: {e}")
+    except APIError as e:
+        print(f"Ошибка при запросе к API: {e}")
+
 
 if __name__ == "__main__":
     main()
