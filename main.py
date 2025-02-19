@@ -7,10 +7,6 @@ API_VERSION = "5.131"
 BASE_URL = "https://api.vk.com/method"
 
 
-class LinkError(Exception):
-    """Исключение для ошибок с сокращённой ссылкой."""
-    pass
-
 class APIError(Exception):
     """Исключение для ошибок API."""
     pass
@@ -78,7 +74,7 @@ def main():
         load_dotenv()
         token = os.getenv("VK_TOKEN")
         if not token:
-            raise LinkError("Не найден VK_TOKEN в .env")
+            raise APIError("Не найден VK_TOKEN в .env")
 
         url = input("Введите ссылку: ").strip()
 
@@ -89,8 +85,6 @@ def main():
             shortened_url = shorten_link(token, url)
             print(f"Сокращенная ссылка: {shortened_url}")
 
-    except LinkError as e:
-        print(f"Ошибка при обработке токена: {e}")
     except APIError as e:
         print(f"Ошибка при запросе к API: {e}")
 
