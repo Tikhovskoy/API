@@ -7,9 +7,9 @@ API_VERSION = "5.131"
 BASE_URL = "https://api.vk.com/method"
 
 
-def is_shorten_link(token: str, url: str) -> bool:
+def is_shorten_link(token: str, url: str):
     parsed_url = urlparse(url)
-    
+
     if parsed_url.netloc.lower() != "vk.cc":
         return False
 
@@ -22,17 +22,12 @@ def is_shorten_link(token: str, url: str) -> bool:
         "interval": "forever"
     }
 
-    try:
-        response = requests.get(api_url, params=params)
-        response.raise_for_status()
-        response_data = response.json()
-        
-        if "response" in response_data:
-            return True
-        else:
-            return False
-    except requests.RequestException:
-        return False
+    response = requests.get(api_url, params=params)
+    response.raise_for_status()
+
+    response_data = response.json()
+
+    return "error" not in response_data and "response" in response_data
 
 
 def shorten_link(token: str, url: str) -> str:
@@ -59,7 +54,7 @@ def count_clicks(token: str, short_url: str) -> int:
     response = requests.get(api_url, params=params)
     response.raise_for_status()
     link_stats_data = response.json()
-    
+
     response_data = link_stats_data.get("response")
     if response_data:
         stats = response_data.get("stats", [])
