@@ -2,6 +2,7 @@ import os
 import requests
 from urllib.parse import urlparse
 from dotenv import load_dotenv
+import argparse
 
 API_VERSION = "5.131"
 BASE_URL = "https://api.vk.com/method"
@@ -70,14 +71,18 @@ def count_clicks(token: str, short_url: str) -> int:
 
 
 def main():
+    load_dotenv()
+    token = os.getenv("VK_TOKEN")
+    if not token:
+        raise APIError("Не найден VK_TOKEN в .env")
+
+    parser = argparse.ArgumentParser(description="Работа с сокращенными ссылками VK")
+    parser.add_argument("url", type=str, help="Ссылка для проверки или сокращения")
+    args = parser.parse_args()
+
+    url = args.url.strip()
+
     try:
-        load_dotenv()
-        token = os.getenv("VK_TOKEN")
-        if not token:
-            raise APIError("Не найден VK_TOKEN в .env")
-
-        url = input("Введите ссылку: ").strip()
-
         if is_shorten_link(token, url):
             clicks = count_clicks(token, url)
             print(f"Количество переходов по ссылке: {clicks}")
